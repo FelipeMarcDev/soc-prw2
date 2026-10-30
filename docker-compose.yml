@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: soc_db
+    restart: always
+    environment:
+      POSTGRES_USER: soc_user
+      POSTGRES_PASSWORD: soc_pass
+      POSTGRES_DB: soc_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - soc_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U soc_user -d soc_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  soc_db_data:

@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum FonteAlerta {
+  FIREWALL
+  SIEM
+  IDS
+  EDR
+  OUTRO
+}
+
+enum Severidade {
+  BAIXA
+  MEDIA
+  ALTA
+  CRITICA
+}
+
+enum StatusIncidente {
+  ALERTA
+  QUALIFICACAO
+  CONTENCAO
+  ERRADICACAO
+  POS_MORTEM
+}
+
+model Incident {
+  id             String          @id @default(uuid())
+  title          String
+  description    String
+  fonteAlerta    FonteAlerta     @default(SIEM) @map("fonte_alerta")
+  ativoAfetado   String          @map("ativo_afetado")
+  analista       String
+  severidade     Severidade      @default(MEDIA)
+  status         StatusIncidente @default(ALERTA)
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime?       @updatedAt @map("updated_at")
+
+  @@map("incidents")
+}
