@@ -10,6 +10,7 @@ import { IncidentRepository } from './domain/repositories/incident.repository';
 import { PrismaIncidentRepository } from './infrastructure/repositories/prisma-incident.repository';
 import { IncidentsController } from './presentation/controllers/incidents.controller';
 import { DomainExceptionFilter } from './presentation/filters/domain-exception.filter';
+import { ExecutarAcaoIncidenteUseCase } from './application/use-cases/executar-acao-incidente.use-case';
 
 @Module({
   controllers: [IncidentsController],
@@ -23,6 +24,7 @@ import { DomainExceptionFilter } from './presentation/filters/domain-exception.f
     UpdateIncidentUseCase,
     UpdateIncidentStatusUseCase,
     DeleteIncidentUseCase,
+    ExecutarAcaoIncidenteUseCase,
   ],
 })
 export class IncidentsModule {}

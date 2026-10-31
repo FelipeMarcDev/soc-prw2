@@ -1,4 +1,6 @@
 import { FonteAlerta, Severidade, StatusIncidente } from '../enums/incident.enums';
+import { InvalidTransitionError } from '../errors/invalid-transition.error';
+import { AcaoIncidente, TRANSICOES } from '../state-machine/incident-transitions';
 
 export interface IncidentProps {
   id: string;
@@ -27,8 +29,21 @@ export class Incident {
   get createdAt() { return this.props.createdAt; }
   get updatedAt() { return this.props.updatedAt; }
 
-  /** Incidente encerrado após a fase de Pós-Morte. */
+  
   get isClosed(): boolean {
     return this.props.status === StatusIncidente.POS_MORTEM;
+  }
+    aplicar(acao: AcaoIncidente, justificativa: string) {
+    const regra = TRANSICOES[acao];
+
+    if (!regra.de.includes(this.props.status)) {
+      throw new InvalidTransitionError(acao, this.props.status);
+    }
+
+    return {
+      estadoAnterior: this.props.status,
+      novoEstado: regra.para,
+      justificativa,
+    };
   }
 }
