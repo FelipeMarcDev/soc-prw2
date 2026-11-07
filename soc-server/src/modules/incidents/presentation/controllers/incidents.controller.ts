@@ -6,20 +6,19 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  Patch,
   Post,
   Put,
 } from '@nestjs/common';
 import { CreateIncidentUseCase } from '../../application/use-cases/create-incident.use-case';
 import { DeleteIncidentUseCase } from '../../application/use-cases/delete-incident.use-case';
+import { ExecutarAcaoIncidenteUseCase } from '../../application/use-cases/executar-acao-incidente.use-case';
 import { GetIncidentUseCase } from '../../application/use-cases/get-incident.use-case';
 import { ListIncidentsUseCase } from '../../application/use-cases/list-incidents.use-case';
-import { UpdateIncidentStatusUseCase } from '../../application/use-cases/update-incident-status.use-case';
 import { UpdateIncidentUseCase } from '../../application/use-cases/update-incident.use-case';
+import { AcaoIncidenteDto } from '../dtos/acao-incidente.dto';
 import { CreateIncidentDto } from '../dtos/create-incident.dto';
 import { IncidentResponseDto } from '../dtos/incident-response.dto';
 import { UpdateIncidentDto } from '../dtos/update-incident.dto';
-import { UpdateStatusDto } from '../dtos/update-status.dto';
 
 @Controller('incidents')
 export class IncidentsController {
@@ -28,7 +27,7 @@ export class IncidentsController {
     private readonly listIncidents: ListIncidentsUseCase,
     private readonly getIncident: GetIncidentUseCase,
     private readonly updateIncident: UpdateIncidentUseCase,
-    private readonly updateIncidentStatus: UpdateIncidentStatusUseCase,
+    private readonly executarAcao: ExecutarAcaoIncidenteUseCase, // NOVO (no lugar do updateIncidentStatus)
     private readonly deleteIncident: DeleteIncidentUseCase,
   ) {}
 
@@ -55,10 +54,31 @@ export class IncidentsController {
     );
   }
 
-  @Patch(':id/status')
-  async updateStatus(@Param('id') id: string, @Body() dto: UpdateStatusDto) {
+  @Post(':id/triar')
+  async triar(@Param('id') id: string, @Body() dto: AcaoIncidenteDto) {
     return IncidentResponseDto.fromDomain(
-      await this.updateIncidentStatus.execute(id, dto.status),
+      await this.executarAcao.execute(id, 'triar', dto.justificativa),
+    );
+  }
+
+  @Post(':id/conter')
+  async conter(@Param('id') id: string, @Body() dto: AcaoIncidenteDto) {
+    return IncidentResponseDto.fromDomain(
+      await this.executarAcao.execute(id, 'conter', dto.justificativa),
+    );
+  }
+
+  @Post(':id/erradicar')
+  async erradicar(@Param('id') id: string, @Body() dto: AcaoIncidenteDto) {
+    return IncidentResponseDto.fromDomain(
+      await this.executarAcao.execute(id, 'erradicar', dto.justificativa),
+    );
+  }
+
+  @Post(':id/encerrar')
+  async encerrar(@Param('id') id: string, @Body() dto: AcaoIncidenteDto) {
+    return IncidentResponseDto.fromDomain(
+      await this.executarAcao.execute(id, 'encerrar', dto.justificativa),
     );
   }
 

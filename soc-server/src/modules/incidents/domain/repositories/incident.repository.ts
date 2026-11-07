@@ -10,14 +10,9 @@ export interface CreateIncidentData {
   severidade: Severidade;
 }
 
-export interface UpdateIncidentData extends CreateIncidentData {
-  status?: StatusIncidente;
-}
+/** Só campos descritivos: o status muda apenas por ações da máquina de estados. */
+export type UpdateIncidentData = CreateIncidentData;
 
-/**
- * Porta (contrato) do repositório. Classe abstrata para servir
- * também como token de injeção de dependência do Nest.
- */
 export abstract class IncidentRepository {
   abstract findAll(): Promise<Incident[]>;
   abstract findById(id: string): Promise<Incident | null>;
