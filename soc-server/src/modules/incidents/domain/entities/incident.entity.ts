@@ -29,11 +29,13 @@ export class Incident {
   get createdAt() { return this.props.createdAt; }
   get updatedAt() { return this.props.updatedAt; }
 
-  
+  /** Incidente na fase final (Pós-Morte). */
   get isClosed(): boolean {
     return this.props.status === StatusIncidente.POS_MORTEM;
   }
-    aplicar(acao: AcaoIncidente, justificativa: string) {
+
+  /** Valida a ação contra a máquina de estados e devolve a transição. */
+  aplicar(acao: AcaoIncidente, justificativa: string) {
     const regra = TRANSICOES[acao];
 
     if (!regra.de.includes(this.props.status)) {

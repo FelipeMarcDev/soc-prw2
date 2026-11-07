@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { CreateIncidentUseCase } from '../../application/use-cases/create-incident.use-case';
 import { DeleteIncidentUseCase } from '../../application/use-cases/delete-incident.use-case';
-import { ExecutarAcaoIncidenteUseCase } from '../../application/use-cases/executar-acao-incidente.use-case'; // NOVO
+import { ExecutarAcaoIncidenteUseCase } from '../../application/use-cases/executar-acao-incidente.use-case';
 import { GetIncidentUseCase } from '../../application/use-cases/get-incident.use-case';
 import { ListIncidentsUseCase } from '../../application/use-cases/list-incidents.use-case';
 import { UpdateIncidentUseCase } from '../../application/use-cases/update-incident.use-case';
@@ -72,6 +72,13 @@ export class IncidentsController {
   async erradicar(@Param('id') id: string, @Body() dto: AcaoIncidenteDto) {
     return IncidentResponseDto.fromDomain(
       await this.executarAcao.execute(id, 'erradicar', dto.justificativa),
+    );
+  }
+
+  @Post(':id/encerrar')
+  async encerrar(@Param('id') id: string, @Body() dto: AcaoIncidenteDto) {
+    return IncidentResponseDto.fromDomain(
+      await this.executarAcao.execute(id, 'encerrar', dto.justificativa),
     );
   }
 

@@ -4,7 +4,6 @@ import { CreateIncidentUseCase } from './application/use-cases/create-incident.u
 import { DeleteIncidentUseCase } from './application/use-cases/delete-incident.use-case';
 import { GetIncidentUseCase } from './application/use-cases/get-incident.use-case';
 import { ListIncidentsUseCase } from './application/use-cases/list-incidents.use-case';
-import { UpdateIncidentStatusUseCase } from './application/use-cases/update-incident-status.use-case';
 import { UpdateIncidentUseCase } from './application/use-cases/update-incident.use-case';
 import { IncidentRepository } from './domain/repositories/incident.repository';
 import { PrismaIncidentRepository } from './infrastructure/repositories/prisma-incident.repository';
@@ -22,7 +21,6 @@ import { ExecutarAcaoIncidenteUseCase } from './application/use-cases/executar-a
     ListIncidentsUseCase,
     GetIncidentUseCase,
     UpdateIncidentUseCase,
-    UpdateIncidentStatusUseCase,
     DeleteIncidentUseCase,
     ExecutarAcaoIncidenteUseCase,
   ],

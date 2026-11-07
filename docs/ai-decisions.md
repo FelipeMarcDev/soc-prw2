@@ -1,23 +1,35 @@
-2. Metodologia: O Uso Pedagógico e Crítico da IA
+# Decisões com IA — Projeto 19 (Incidentes SOC)
 
-O Desafio: Máquina de Estados Finita e Transições Restritas
+Ferramenta: Claude (Anthropic). Escopo: Parte 1 — máquina de estados.
 
-O Prompt Utilizado: Como posso fazer a restrição de troca de estados do formulário como não permitir de ALERTA -> POS-MORTEM
+---
 
-A Resposta Bruta da IA: 
-```bash
-O que é “máquina de estados” aqui
+## Consulta 1 — Restringir transições de status
 
-São 3 coisas juntas:
+**O Desafio:** o sistema aceitava qualquer status (ex.: `ALERTA → POS_MORTEM`), pelo `PATCH /status` e pelo `PUT`.
 
-1. Estados: em que fase o incidente está (ex.: EM_TRIAGEM).
+**O Prompt Utilizado:**
+> esse é o projeto atual, analise e me guie para a parte 1
 
-2. Transições permitidas: uma tabela dizendo de onde dá pra ir para onde, e por qual ação. Exemplo:
-
-3. Regras extras (guardas e permissões): mesmo que a transição seja válida, ela pode ser barrada. Exemplos:
-
-Guarda: “não pode encerrar um P1(CRITICA) sem post-mortem preenchido”.
-Permissão: “analista N1 não pode encerrar P1(CRITICA), só o gestor”.
+**A Resposta Bruta da IA:** (trecho)
+```ts
+export const TRANSICOES = {
+  triar:     { de: ['ALERTA'],       para: 'QUALIFICACAO' },
+  confirmar: { de: ['QUALIFICACAO'], para: 'CONTENCAO' },
+  conter:    { de: ['CONTENCAO'],    para: 'ERRADICACAO' },
+  erradicar: { de: ['ERRADICACAO'],  para: 'POS_MORTEM' },
+  encerrar:  { de: ['POS_MORTEM'],   para: 'POS_MORTEM' },
+};
+// entidade: aplicar(acao, justificativa) valida contra a tabela
+// controller: um endpoint POST por ação
 ```
 
-A Crítica e Refatoração do Aluno: O que a IA errou  e o que o aluno precisou alterar para integrar de fato à arquitetura do projeto.
+**A Crítica e Refatoração do Aluno:**
+- A IA propôs `confirmar` sem endpoint no controller: o fluxo travava em `QUALIFICACAO`. Removi a ação.
+- `encerrar` ia de `POS_MORTEM` para `POS_MORTEM` (não muda nada). Corrigi para `ERRADICACAO → POS_MORTEM`
+- A IA explicou como seguir com a mudança nas transições, que deveriam seguir um ciclo de vida e não somente uma troca de status.
+- Foram criados diferentes endpoints no controller para mudança desse status.
+---
+
+## Próximas consultas
+RBAC por estado/severidade · guarda de post-mortem P1/P2 · SLA · audit log ACID · imutabilidade dos logs de contenção.
