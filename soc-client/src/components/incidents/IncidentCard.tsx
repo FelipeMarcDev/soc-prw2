@@ -3,18 +3,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  ACAO_POR_STATUS,
+  AcaoIncidente,
   FONTE_LABEL,
   Incident,
   SEVERIDADE_LABEL,
   STATUS_LABEL,
-  StatusIncidente,
-  nextStatus,
 } from "@/lib/config";
 
 interface IncidentCardProps {
   incident: Incident;
-  onAdvance: (id: string, status: StatusIncidente) => void;
-  onDelete: (incident: Incident) => void;
+  onAction: (incident: Incident, acao: AcaoIncidente) => void;
 }
 
 function severidadeVariant(severidade: Incident["severidade"]) {
@@ -24,8 +23,8 @@ function severidadeVariant(severidade: Incident["severidade"]) {
   return "default" as const;
 }
 
-export function IncidentCard({ incident, onAdvance, onDelete }: IncidentCardProps) {
-  const proximo = nextStatus(incident.status);
+export function IncidentCard({ incident, onAction }: IncidentCardProps) {
+  const proxima = ACAO_POR_STATUS[incident.status];
   const finalizado = incident.status === "POS_MORTEM";
 
   return (
@@ -56,9 +55,13 @@ export function IncidentCard({ incident, onAdvance, onDelete }: IncidentCardProp
           </span>
 
           <div className="flex flex-wrap gap-2">
-            {proximo && (
-              <Button size="sm" variant="outline" onClick={() => onAdvance(incident.id, proximo)}>
-                Avançar para: {STATUS_LABEL[proximo]}
+            {proxima && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onAction(incident, proxima.acao)}
+              >
+                {proxima.label}
               </Button>
             )}
             <Link
@@ -67,9 +70,6 @@ export function IncidentCard({ incident, onAdvance, onDelete }: IncidentCardProp
             >
               Editar
             </Link>
-            <Button size="sm" variant="destructive" onClick={() => onDelete(incident)}>
-              Excluir
-            </Button>
           </div>
         </div>
       </CardContent>

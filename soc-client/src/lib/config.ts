@@ -21,14 +21,6 @@ export interface Incident {
   createdAt: string;
 }
 
-export const STATUS_FLOW: StatusIncidente[] = [
-  "ALERTA",
-  "QUALIFICACAO",
-  "CONTENCAO",
-  "ERRADICACAO",
-  "POS_MORTEM",
-];
-
 export const STATUS_LABEL: Record<StatusIncidente, string> = {
   ALERTA: "Alerta Disparado",
   QUALIFICACAO: "Qualificação da Ameaça",
@@ -44,11 +36,19 @@ export const SEVERIDADE_LABEL: Record<Severidade, string> = {
   CRITICA: "Crítica",
 };
 
-export function nextStatus(current: StatusIncidente): StatusIncidente | null {
-  const idx = STATUS_FLOW.indexOf(current);
-  if (idx === -1 || idx === STATUS_FLOW.length - 1) return null;
-  return STATUS_FLOW[idx + 1];
-}
+export type AcaoIncidente = "triar" | "conter" | "erradicar" | "encerrar";
+
+/** Única ação disponível em cada status (espelha a tabela de transições do back). */
+export const ACAO_POR_STATUS: Record<
+  StatusIncidente,
+  { acao: AcaoIncidente; label: string } | null
+> = {
+  ALERTA: { acao: "triar", label: "Triar" },
+  QUALIFICACAO: { acao: "conter", label: "Conter" },
+  CONTENCAO: { acao: "erradicar", label: "Erradicar" },
+  ERRADICACAO: { acao: "encerrar", label: "Encerrar" },
+  POS_MORTEM: null,
+};
 
 export const FONTE_LABEL: Record<FonteAlerta, string> = {
   FIREWALL: "Firewall",
