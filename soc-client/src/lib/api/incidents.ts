@@ -1,4 +1,4 @@
-import { API_URL, Incident, IncidentInput, StatusIncidente } from "@/lib/config";
+import { AcaoIncidente, API_URL, Incident, IncidentInput } from "@/lib/config";
 
 export class ApiError extends Error {
   constructor(message: string, public status: number) {
@@ -33,10 +33,9 @@ export const incidentsApi = {
     request<Incident>("/incidents", { method: "POST", body: JSON.stringify(data) }),
   update: (id: string, data: IncidentInput) =>
     request<Incident>(`/incidents/${id}`, { method: "PUT", body: JSON.stringify(data) }),
-  updateStatus: (id: string, status: StatusIncidente) =>
-    request<Incident>(`/incidents/${id}/status`, {
-      method: "PATCH",
-      body: JSON.stringify({ status }),
+  executarAcao: (id: string, acao: AcaoIncidente, justificativa: string) =>
+    request<Incident>(`/incidents/${id}/${acao}`, {
+      method: "POST",
+      body: JSON.stringify({ justificativa }),
     }),
-  remove: (id: string) => request<void>(`/incidents/${id}`, { method: "DELETE" }),
 };

@@ -3,16 +3,19 @@
 import React from "react";
 import Link from "next/link";
 import { IncidentCard } from "./IncidentCard";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { AcaoDialog } from "@/components/ui/acao-dialog";
 import { incidentsApi } from "@/lib/api/incidents";
-import { Incident, StatusIncidente } from "@/lib/config";
+import { ACAO_POR_STATUS, AcaoIncidente, Incident } from "@/lib/config";
 
 export default function IncidentsPage() {
   const [incidents, setIncidents] = React.useState<Incident[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [toDelete, setToDelete] = React.useState<Incident | null>(null);
-  const [deleting, setDeleting] = React.useState(false);
+  const [pending, setPending] = React.useState<{
+    incident: Incident;
+    acao: AcaoIncidente;
+  } | null>(null);
+  const [submitting, setSubmitting] = React.useState(false);
 
   const fetchIncidents = React.useCallback(async () => {
     try {
@@ -29,29 +32,22 @@ export default function IncidentsPage() {
     fetchIncidents();
   }, [fetchIncidents]);
 
-  async function handleAdvance(id: string, status: StatusIncidente) {
+  async function handleConfirm(justificativa: string) {
+    if (!pending) return;
+    setSubmitting(true);
     try {
-      await incidentsApi.updateStatus(id, status);
-      await fetchIncidents();
+      await incidentsApi.executarAcao(pending.incident.id, pending.acao, justificativa);
+      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao avançar o incidente.");
+      setError(err instanceof Error ? err.message : "Erro ao executar a ação.");
+    } finally {
+      setPending(null);
+      setSubmitting(false);
+      await fetchIncidents();
     }
   }
 
-  async function confirmDelete() {
-    if (!toDelete) return;
-    setDeleting(true);
-    try {
-      await incidentsApi.remove(toDelete.id);
-      setToDelete(null);
-      await fetchIncidents();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao excluir o incidente.");
-      setToDelete(null);
-    } finally {
-      setDeleting(false);
-    }
-  }
+  const rotulo = pending ? ACAO_POR_STATUS[pending.incident.status]?.label ?? "" : "";
 
   return (
     <main className="container max-w-4xl mx-auto py-12 px-4 space-y-8">
@@ -92,20 +88,20 @@ export default function IncidentsPage() {
             <IncidentCard
               key={incident.id}
               incident={incident}
-              onAdvance={handleAdvance}
-              onDelete={setToDelete}
+              onAction={(incident, acao) => setPending({ incident, acao })}
             />
           ))
         )}
       </section>
 
-      <ConfirmDialog
-        open={!!toDelete}
-        title="Excluir incidente"
-        description={`Tem certeza que deseja excluir "${toDelete?.title ?? ""}"? Esta ação não pode ser desfeita.`}
-        loading={deleting}
-        onConfirm={confirmDelete}
-        onCancel={() => setToDelete(null)}
+      <AcaoDialog
+        open={!!pending}
+        title={`${rotulo} incidente`}
+        description={`"${pending?.incident.title ?? ""}" — informe a justificativa. Ela será registrada.`}
+        confirmLabel={rotulo}
+        loading={submitting}
+        onConfirm={handleConfirm}
+        onCancel={() => setPending(null)}
       />
     </main>
   );
