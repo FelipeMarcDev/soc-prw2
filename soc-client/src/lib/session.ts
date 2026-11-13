@@ -3,6 +3,7 @@ const KEY = "soc.usuarioId";
 let atual: string | null = null;
 
 export function getUsuarioId(): string | null {
+  if (atual === null) loadUsuarioId();
   return atual;
 }
 

@@ -1,4 +1,5 @@
 import { Incident } from '../../domain/entities/incident.entity';
+import { Sla } from '../../domain/sla/sla';
 
 export class IncidentResponseDto {
   id: string;
@@ -11,6 +12,8 @@ export class IncidentResponseDto {
   status: string;
   createdAt: Date;
   updatedAt: Date | null;
+  closedAt: Date | null;
+  sla: Sla;
 
   static fromDomain(incident: Incident): IncidentResponseDto {
     return {
@@ -24,6 +27,8 @@ export class IncidentResponseDto {
       status: incident.status,
       createdAt: incident.createdAt,
       updatedAt: incident.updatedAt,
+      closedAt: incident.closedAt,
+      sla: incident.sla(),
     };
   }
 }

@@ -4,10 +4,11 @@ import React from "react";
 import Link from "next/link";
 import { IncidentCard } from "./IncidentCard";
 import { AcaoDialog } from "@/components/ui/acao-dialog";
+import { ReclassificarDialog } from "@/components/ui/reclassificar-dialog";
 import { incidentsApi } from "@/lib/api/incidents";
 import { usersApi } from "@/lib/api/users";
 import { loadUsuarioId, setUsuarioId } from "@/lib/session";
-import { ACAO_POR_STATUS, AcaoIncidente, Incident, Usuario } from "@/lib/config";
+import { ACAO_POR_STATUS, AcaoIncidente, Incident, Severidade, Usuario } from "@/lib/config";
 
 export default function IncidentsPage() {
   const [incidents, setIncidents] = React.useState<Incident[]>([]);
@@ -17,6 +18,7 @@ export default function IncidentsPage() {
     incident: Incident;
     acao: AcaoIncidente;
   } | null>(null);
+  const [reclassificando, setReclassificando] = React.useState<Incident | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
   const [usuarios, setUsuarios] = React.useState<Usuario[]>([]);
   const [usuarioId, setUsuarioIdState] = React.useState<string>("");
@@ -67,6 +69,21 @@ export default function IncidentsPage() {
       setError(err instanceof Error ? err.message : "Erro ao executar a ação.");
     } finally {
       setPending(null);
+      setSubmitting(false);
+      await fetchIncidents();
+    }
+  }
+
+  async function handleReclassificar(severidade: Severidade, justificativa: string) {
+    if (!reclassificando) return;
+    setSubmitting(true);
+    try {
+      await incidentsApi.reclassificar(reclassificando.id, severidade, justificativa);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao reclassificar.");
+    } finally {
+      setReclassificando(null);
       setSubmitting(false);
       await fetchIncidents();
     }
@@ -132,6 +149,7 @@ export default function IncidentsPage() {
               key={incident.id}
               incident={incident}
               onAction={(incident, acao) => setPending({ incident, acao })}
+              onReclassify={setReclassificando}
             />
           ))
         )}
@@ -145,6 +163,15 @@ export default function IncidentsPage() {
         loading={submitting}
         onConfirm={handleConfirm}
         onCancel={() => setPending(null)}
+      />
+
+      <ReclassificarDialog
+        open={!!reclassificando}
+        titulo={reclassificando?.title ?? ""}
+        atual={reclassificando?.severidade ?? "MEDIA"}
+        loading={submitting}
+        onConfirm={handleReclassificar}
+        onCancel={() => setReclassificando(null)}
       />
     </main>
   );

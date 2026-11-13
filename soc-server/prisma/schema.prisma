@@ -42,20 +42,82 @@ model Usuario {
   papel     Papel
   createdAt DateTime @default(now()) @map("created_at")
 
+  historico      HistoricoStatus[]
+  postMortems    PostMortem[]
+  acoesContencao AcaoContencao[]
+
   @@map("usuarios")
 }
 
 model Incident {
-  id             String          @id @default(uuid())
-  title          String
-  description    String
-  fonteAlerta    FonteAlerta     @default(SIEM) @map("fonte_alerta")
-  ativoAfetado   String          @map("ativo_afetado")
-  analista       String
-  severidade     Severidade      @default(MEDIA)
-  status         StatusIncidente @default(ALERTA)
-  createdAt      DateTime        @default(now()) @map("created_at")
-  updatedAt      DateTime?       @updatedAt @map("updated_at")
+  id           String          @id @default(uuid())
+  title        String
+  description  String
+  fonteAlerta  FonteAlerta     @default(SIEM) @map("fonte_alerta")
+  ativoAfetado String          @map("ativo_afetado")
+  analista     String
+  severidade   Severidade      @default(MEDIA)
+  status       StatusIncidente @default(ALERTA)
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime?       @updatedAt @map("updated_at")
+  closedAt     DateTime?       @map("closed_at")
+
+  historico      HistoricoStatus[]
+  postMortem     PostMortem?
+  acoesContencao AcaoContencao[]
 
   @@map("incidents")
+}
+
+/// Audit log: cada mudança de status gera uma linha, gravada na mesma transação.
+model HistoricoStatus {
+  id                 String          @id @default(uuid())
+  incidentId         String          @map("incident_id")
+  acao               String          @default("TRANSICAO")
+  estadoAnterior     StatusIncidente @map("estado_anterior")
+  novoEstado         StatusIncidente @map("novo_estado")
+  severidadeAnterior Severidade?     @map("severidade_anterior")
+  severidadeNova     Severidade?     @map("severidade_nova")
+  autorId            String          @map("autor_id")
+  justificativa      String
+  createdAt          DateTime        @default(now()) @map("created_at")
+
+  incident Incident @relation(fields: [incidentId], references: [id])
+  autor    Usuario  @relation(fields: [autorId], references: [id])
+
+  @@index([incidentId])
+  @@map("historico_status")
+}
+
+/// Post-mortem: um por incidente. Obrigatório para encerrar P1/P2.
+model PostMortem {
+  id               String   @id @default(uuid())
+  incidentId       String   @unique @map("incident_id")
+  causaRaiz        String   @map("causa_raiz")
+  linhaDoTempo     String   @map("linha_do_tempo")
+  licoesAprendidas String   @map("licoes_aprendidas")
+  acoesCorretivas  String   @map("acoes_corretivas")
+  autorId          String   @map("autor_id")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  incident Incident @relation(fields: [incidentId], references: [id])
+  autor    Usuario  @relation(fields: [autorId], references: [id])
+
+  @@map("post_mortems")
+}
+
+/// Registro de ações de contenção. Log imutável: um trigger no banco bloqueia UPDATE/DELETE/TRUNCATE.
+model AcaoContencao {
+  id         String   @id @default(uuid())
+  incidentId String   @map("incident_id")
+  descricao  String
+  autorId    String   @map("autor_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  incident Incident @relation(fields: [incidentId], references: [id])
+  autor    Usuario  @relation(fields: [autorId], references: [id])
+
+  @@index([incidentId])
+  @@map("acoes_contencao")
 }
