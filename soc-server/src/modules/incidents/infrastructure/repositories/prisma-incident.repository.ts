@@ -38,10 +38,6 @@ export class PrismaIncidentRepository implements IncidentRepository {
       await this.prisma.incident.update({ where: { id }, data: { status } }),
     );
   }
-
-  async delete(id: string): Promise<void> {
-    await this.prisma.incident.delete({ where: { id } });
-  }
 }
 
 function toDomain(row: PrismaIncident): Incident {

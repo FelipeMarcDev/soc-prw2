@@ -24,3 +24,11 @@ export const StatusIncidente = {
 } as const;
 export type StatusIncidente =
   (typeof StatusIncidente)[keyof typeof StatusIncidente];
+
+/** Nível de prioridade do SOC (P1 a P4) correspondente a cada severidade. */
+export const NIVEL_SEVERIDADE: Record<Severidade, 'P1' | 'P2' | 'P3' | 'P4'> = {
+  CRITICA: 'P1',
+  ALTA: 'P2',
+  MEDIA: 'P3',
+  BAIXA: 'P4',
+};

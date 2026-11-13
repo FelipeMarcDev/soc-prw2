@@ -30,10 +30,10 @@ export const STATUS_LABEL: Record<StatusIncidente, string> = {
 };
 
 export const SEVERIDADE_LABEL: Record<Severidade, string> = {
-  BAIXA: "Baixa",
-  MEDIA: "Média",
-  ALTA: "Alta",
-  CRITICA: "Crítica",
+  BAIXA: "P4 · Baixa",
+  MEDIA: "P3 · Média",
+  ALTA: "P2 · Alta",
+  CRITICA: "P1 · Crítica",
 };
 
 export type AcaoIncidente = "triar" | "conter" | "erradicar" | "encerrar";
@@ -65,4 +65,12 @@ export interface IncidentInput {
   ativoAfetado: string;
   analista: string;
   severidade: Severidade;
+}
+
+export type Papel = "ANALISTA_N1" | "ANALISTA_N2" | "GESTOR_SOC";
+
+export interface Usuario {
+  id: string;
+  nome: string;
+  papel: Papel;
 }

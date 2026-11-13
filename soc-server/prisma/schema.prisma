@@ -30,6 +30,21 @@ enum StatusIncidente {
   POS_MORTEM
 }
 
+enum Papel {
+  ANALISTA_N1
+  ANALISTA_N2
+  GESTOR_SOC
+}
+
+model Usuario {
+  id        String   @id @default(uuid())
+  nome      String
+  papel     Papel
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("usuarios")
+}
+
 model Incident {
   id             String          @id @default(uuid())
   title          String

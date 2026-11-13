@@ -1,3 +1,4 @@
+import { getUsuarioId } from "@/lib/session";
 import { AcaoIncidente, API_URL, Incident, IncidentInput } from "@/lib/config";
 
 export class ApiError extends Error {
@@ -9,7 +10,11 @@ export class ApiError extends Error {
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
-    headers: { "Content-Type": "application/json", ...init?.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...(getUsuarioId() ? { "X-User-Id": getUsuarioId() as string } : {}),
+      ...init?.headers,
+    },
     cache: "no-store",
   });
 
