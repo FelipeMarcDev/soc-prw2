@@ -5,7 +5,11 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { DomainError, NotFoundError } from '../../../../shared/domain/domain.error';
+import {
+  DomainError,
+  ForbiddenError,
+  NotFoundError,
+} from '../../../../shared/domain/domain.error';
 
 /** Traduz erros de domínio em respostas HTTP, mantendo o domínio livre do Nest. */
 @Catch(DomainError)
@@ -15,7 +19,9 @@ export class DomainExceptionFilter implements ExceptionFilter {
     const status =
       error instanceof NotFoundError
         ? HttpStatus.NOT_FOUND
-        : HttpStatus.UNPROCESSABLE_ENTITY;
+        : error instanceof ForbiddenError
+          ? HttpStatus.FORBIDDEN
+          : HttpStatus.UNPROCESSABLE_ENTITY;
 
     response.status(status).json({
       statusCode: status,

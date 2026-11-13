@@ -5,7 +5,9 @@ import Link from "next/link";
 import { IncidentCard } from "./IncidentCard";
 import { AcaoDialog } from "@/components/ui/acao-dialog";
 import { incidentsApi } from "@/lib/api/incidents";
-import { ACAO_POR_STATUS, AcaoIncidente, Incident } from "@/lib/config";
+import { usersApi } from "@/lib/api/users";
+import { loadUsuarioId, setUsuarioId } from "@/lib/session";
+import { ACAO_POR_STATUS, AcaoIncidente, Incident, Usuario } from "@/lib/config";
 
 export default function IncidentsPage() {
   const [incidents, setIncidents] = React.useState<Incident[]>([]);
@@ -16,6 +18,8 @@ export default function IncidentsPage() {
     acao: AcaoIncidente;
   } | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
+  const [usuarios, setUsuarios] = React.useState<Usuario[]>([]);
+  const [usuarioId, setUsuarioIdState] = React.useState<string>("");
 
   const fetchIncidents = React.useCallback(async () => {
     try {
@@ -31,6 +35,27 @@ export default function IncidentsPage() {
   React.useEffect(() => {
     fetchIncidents();
   }, [fetchIncidents]);
+
+  React.useEffect(() => {
+    usersApi
+      .list()
+      .then((lista) => {
+        setUsuarios(lista);
+        const salvo = loadUsuarioId();
+        const escolhido = lista.find((u) => u.id === salvo) ?? lista[0];
+        if (escolhido) {
+          setUsuarioId(escolhido.id);
+          setUsuarioIdState(escolhido.id);
+        }
+      })
+      .catch(() => setError("Erro ao carregar usuários."));
+  }, []);
+
+  function handleUsuarioChange(id: string) {
+    setUsuarioId(id);
+    setUsuarioIdState(id);
+    setError(null);
+  }
 
   async function handleConfirm(justificativa: string) {
     if (!pending) return;
@@ -56,6 +81,24 @@ export default function IncidentsPage() {
         <p className="text-slate-500">
           Alerta → Qualificação da Ameaça → Contenção Temporária → Erradicação → Pós-Morte
         </p>
+      </section>
+
+      <section className="max-w-2xl mx-auto flex items-center justify-end gap-2 text-sm">
+        <label htmlFor="usuario" className="text-slate-500">
+          Atuando como:
+        </label>
+        <select
+          id="usuario"
+          value={usuarioId}
+          onChange={(e) => handleUsuarioChange(e.target.value)}
+          className="h-9 rounded-md border border-slate-300 bg-white px-2"
+        >
+          {usuarios.map((u) => (
+            <option key={u.id} value={u.id}>
+              {u.nome}
+            </option>
+          ))}
+        </select>
       </section>
 
       <section className="space-y-4 max-w-2xl mx-auto">

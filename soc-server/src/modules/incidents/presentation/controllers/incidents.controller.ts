@@ -1,20 +1,20 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
-  HttpCode,
-  HttpStatus,
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateIncidentUseCase } from '../../application/use-cases/create-incident.use-case';
-import { DeleteIncidentUseCase } from '../../application/use-cases/delete-incident.use-case';
 import { ExecutarAcaoIncidenteUseCase } from '../../application/use-cases/executar-acao-incidente.use-case';
 import { GetIncidentUseCase } from '../../application/use-cases/get-incident.use-case';
 import { ListIncidentsUseCase } from '../../application/use-cases/list-incidents.use-case';
 import { UpdateIncidentUseCase } from '../../application/use-cases/update-incident.use-case';
+import { Usuario } from '../../../users/domain/entities/usuario.entity';
+import { UsuarioAtual } from '../../../users/presentation/usuario-atual.decorator';
+import { UsuarioAtualGuard } from '../../../users/presentation/usuario-atual.guard';
 import { AcaoIncidenteDto } from '../dtos/acao-incidente.dto';
 import { CreateIncidentDto } from '../dtos/create-incident.dto';
 import { IncidentResponseDto } from '../dtos/incident-response.dto';
@@ -28,7 +28,6 @@ export class IncidentsController {
     private readonly getIncident: GetIncidentUseCase,
     private readonly updateIncident: UpdateIncidentUseCase,
     private readonly executarAcao: ExecutarAcaoIncidenteUseCase, // NOVO (no lugar do updateIncidentStatus)
-    private readonly deleteIncident: DeleteIncidentUseCase,
   ) {}
 
   @Post()
@@ -55,36 +54,50 @@ export class IncidentsController {
   }
 
   @Post(':id/triar')
-  async triar(@Param('id') id: string, @Body() dto: AcaoIncidenteDto) {
+  @UseGuards(UsuarioAtualGuard)
+  async triar(
+    @Param('id') id: string,
+    @Body() dto: AcaoIncidenteDto,
+    @UsuarioAtual() usuario: Usuario,
+  ) {
     return IncidentResponseDto.fromDomain(
-      await this.executarAcao.execute(id, 'triar', dto.justificativa),
+      await this.executarAcao.execute(id, 'triar', usuario, dto.justificativa),
     );
   }
 
   @Post(':id/conter')
-  async conter(@Param('id') id: string, @Body() dto: AcaoIncidenteDto) {
+  @UseGuards(UsuarioAtualGuard)
+  async conter(
+    @Param('id') id: string,
+    @Body() dto: AcaoIncidenteDto,
+    @UsuarioAtual() usuario: Usuario,
+  ) {
     return IncidentResponseDto.fromDomain(
-      await this.executarAcao.execute(id, 'conter', dto.justificativa),
+      await this.executarAcao.execute(id, 'conter', usuario, dto.justificativa),
     );
   }
 
   @Post(':id/erradicar')
-  async erradicar(@Param('id') id: string, @Body() dto: AcaoIncidenteDto) {
+  @UseGuards(UsuarioAtualGuard)
+  async erradicar(
+    @Param('id') id: string,
+    @Body() dto: AcaoIncidenteDto,
+    @UsuarioAtual() usuario: Usuario,
+  ) {
     return IncidentResponseDto.fromDomain(
-      await this.executarAcao.execute(id, 'erradicar', dto.justificativa),
+      await this.executarAcao.execute(id, 'erradicar', usuario, dto.justificativa),
     );
   }
 
   @Post(':id/encerrar')
-  async encerrar(@Param('id') id: string, @Body() dto: AcaoIncidenteDto) {
+  @UseGuards(UsuarioAtualGuard)
+  async encerrar(
+    @Param('id') id: string,
+    @Body() dto: AcaoIncidenteDto,
+    @UsuarioAtual() usuario: Usuario,
+  ) {
     return IncidentResponseDto.fromDomain(
-      await this.executarAcao.execute(id, 'encerrar', dto.justificativa),
+      await this.executarAcao.execute(id, 'encerrar', usuario, dto.justificativa),
     );
-  }
-
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string) {
-    await this.deleteIncident.execute(id);
   }
 }

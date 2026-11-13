@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
+import { UsersModule } from '../users/users.module';
 import { CreateIncidentUseCase } from './application/use-cases/create-incident.use-case';
-import { DeleteIncidentUseCase } from './application/use-cases/delete-incident.use-case';
 import { GetIncidentUseCase } from './application/use-cases/get-incident.use-case';
 import { ListIncidentsUseCase } from './application/use-cases/list-incidents.use-case';
 import { UpdateIncidentUseCase } from './application/use-cases/update-incident.use-case';
@@ -12,6 +12,7 @@ import { DomainExceptionFilter } from './presentation/filters/domain-exception.f
 import { ExecutarAcaoIncidenteUseCase } from './application/use-cases/executar-acao-incidente.use-case';
 
 @Module({
+  imports: [UsersModule],
   controllers: [IncidentsController],
   providers: [
     // Inversão de dependência: o domínio conhece só a porta, o Nest injeta o adaptador.
@@ -21,7 +22,6 @@ import { ExecutarAcaoIncidenteUseCase } from './application/use-cases/executar-a
     ListIncidentsUseCase,
     GetIncidentUseCase,
     UpdateIncidentUseCase,
-    DeleteIncidentUseCase,
     ExecutarAcaoIncidenteUseCase,
   ],
 })
