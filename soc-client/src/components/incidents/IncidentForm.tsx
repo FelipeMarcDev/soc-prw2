@@ -28,6 +28,8 @@ interface IncidentFormProps {
   submittingLabel: string;
   onSubmit: (data: IncidentInput) => Promise<void>;
   onCancel: () => void;
+  /** Na edição a severidade não muda aqui: use a ação Reclassificar. */
+  ocultarSeveridade?: boolean;
 }
 
 export function IncidentForm({
@@ -36,6 +38,7 @@ export function IncidentForm({
   submittingLabel,
   onSubmit,
   onCancel,
+  ocultarSeveridade = false,
 }: IncidentFormProps) {
   const [values, setValues] = React.useState<IncidentInput>(initialValues);
   const [loading, setLoading] = React.useState(false);
@@ -97,19 +100,21 @@ export function IncidentForm({
           </Select>
         </div>
 
-        <div>
-          <label className="text-xs font-medium text-slate-500">Severidade</label>
-          <Select
-            value={values.severidade}
-            onChange={(e) => set("severidade", e.target.value as Severidade)}
-          >
-            {Object.entries(SEVERIDADE_LABEL).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </Select>
-        </div>
+        {!ocultarSeveridade && (
+          <div>
+            <label className="text-xs font-medium text-slate-500">Severidade</label>
+            <Select
+              value={values.severidade}
+              onChange={(e) => set("severidade", e.target.value as Severidade)}
+            >
+              {Object.entries(SEVERIDADE_LABEL).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </Select>
+          </div>
+        )}
       </div>
 
       <div>

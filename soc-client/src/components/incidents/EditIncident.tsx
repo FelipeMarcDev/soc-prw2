@@ -37,11 +37,14 @@ export default function EditIncident({ id }: { id: string }) {
         analista: incident.analista,
         severidade: incident.severidade,
       }}
+      ocultarSeveridade
       submitLabel="Salvar alterações"
       submittingLabel="Salvando..."
       onCancel={() => router.push("/incidents")}
       onSubmit={async (data) => {
-        await incidentsApi.update(id, data);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { severidade, ...descritivos } = data;
+        await incidentsApi.update(id, descritivos);
         router.push("/incidents");
         router.refresh();
       }}

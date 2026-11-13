@@ -1,5 +1,13 @@
 import { getUsuarioId } from "@/lib/session";
-import { AcaoIncidente, API_URL, Incident, IncidentInput } from "@/lib/config";
+import {
+  AcaoContencao,
+  AcaoIncidente,
+  API_URL,
+  Incident,
+  IncidentInput,
+  PostMortemInput,
+  Severidade,
+} from "@/lib/config";
 
 export class ApiError extends Error {
   constructor(message: string, public status: number) {
@@ -36,11 +44,28 @@ export const incidentsApi = {
   get: (id: string) => request<Incident>(`/incidents/${id}`),
   create: (data: IncidentInput) =>
     request<Incident>("/incidents", { method: "POST", body: JSON.stringify(data) }),
-  update: (id: string, data: IncidentInput) =>
+  update: (id: string, data: Omit<IncidentInput, "severidade">) =>
     request<Incident>(`/incidents/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   executarAcao: (id: string, acao: AcaoIncidente, justificativa: string) =>
     request<Incident>(`/incidents/${id}/${acao}`, {
       method: "POST",
       body: JSON.stringify({ justificativa }),
+    }),
+  reclassificar: (id: string, severidade: Severidade, justificativa: string) =>
+    request<Incident>(`/incidents/${id}/reclassificar`, {
+      method: "POST",
+      body: JSON.stringify({ severidade, justificativa }),
+    }),
+  listarContencoes: (id: string) => request<AcaoContencao[]>(`/incidents/${id}/contencao`),
+  adicionarContencao: (id: string, descricao: string) =>
+    request<AcaoContencao>(`/incidents/${id}/contencao`, {
+      method: "POST",
+      body: JSON.stringify({ descricao }),
+    }),
+  getPostMortem: (id: string) => request<PostMortemInput>(`/incidents/${id}/post-mortem`),
+  salvarPostMortem: (id: string, data: PostMortemInput) =>
+    request<PostMortemInput>(`/incidents/${id}/post-mortem`, {
+      method: "PUT",
+      body: JSON.stringify(data),
     }),
 };

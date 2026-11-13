@@ -19,8 +19,17 @@ export class ExecutarAcaoIncidenteUseCase {
     if (!incident) throw new IncidentNotFoundError(id);
 
     // A entidade valida (lança InvalidTransitionError se não pode)
-    const transicao = incident.aplicar(acao, usuario, justificativa);
+    // Só consulta o que a guarda da ação precisa.
+    const contexto = {
+      postMortemRegistrado:
+        acao === 'encerrar'
+          ? (await this.repository.findPostMortem(id)) !== null
+          : false,
+      acoesContencao:
+        acao === 'erradicar' ? await this.repository.countContencoes(id) : 0,
+    };
+    const transicao = incident.aplicar(acao, usuario, justificativa, contexto);
 
-    return this.repository.updateStatus(id, transicao.novoEstado);
+    return this.repository.applyTransition(id, transicao);
   }
 }

@@ -19,6 +19,8 @@ export interface Incident {
   severidade: Severidade;
   status: StatusIncidente;
   createdAt: string;
+  closedAt: string | null;
+  sla: Sla;
 }
 
 export const STATUS_LABEL: Record<StatusIncidente, string> = {
@@ -73,4 +75,29 @@ export interface Usuario {
   id: string;
   nome: string;
   papel: Papel;
+}
+
+export interface PostMortemInput {
+  causaRaiz: string;
+  linhaDoTempo: string;
+  licoesAprendidas: string;
+  acoesCorretivas: string;
+}
+
+export type SituacaoSla = "NO_PRAZO" | "EM_RISCO" | "ESTOURADO" | "CUMPRIDO" | "VIOLADO";
+export type Escalonamento = "NENHUM" | "AVISO_GESTOR" | "ESCALONADO";
+
+export interface Sla {
+  prazoMinutos: number;
+  venceEm: string;
+  restanteMinutos: number | null;
+  situacao: SituacaoSla;
+  escalonamento: Escalonamento;
+}
+
+export interface AcaoContencao {
+  id: string;
+  descricao: string;
+  autorNome: string;
+  createdAt: string;
 }
